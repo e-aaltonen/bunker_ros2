@@ -21,6 +21,7 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 #include "bunker_msgs/msg/bunker_status.hpp"
+#include "bunker_msgs/msg/bunker_rc_state.hpp"  //EA
 
 #include "ugv_sdk/mobile_robot/bunker_robot.hpp"
 #include "ugv_sdk/utilities/protocol_detector.hpp"
@@ -47,6 +48,9 @@ class BunkerMessenger {
         node_->create_publisher<nav_msgs::msg::Odometry>(odom_topic_name_, 50);
     status_pub_ = node_->create_publisher<bunker_msgs::msg::BunkerStatus>(
         "/bunker_status", 10);
+
+    rc_state_pub_ = node_->create_publisher<bunker_msgs::msg::BunkerRCState>(
+        "/rc_state", 10); //EA
 
     // cmd subscriber
     motion_cmd_sub_ = node_->create_subscription<geometry_msgs::msg::Twist>(
@@ -116,6 +120,22 @@ class BunkerMessenger {
 
     status_pub_->publish(status_msg);
 
+    // publish RC state message //EA
+
+    bunker_msgs::msg::BunkerRCState rc_state_msg; //
+
+    rc_state_msg.swa = state.rc_state.swa; //
+    rc_state_msg.swb = state.rc_state.swb; //
+    rc_state_msg.swc = state.rc_state.swc;  //
+    rc_state_msg.swd = state.rc_state.swd; //
+    rc_state_msg.stick_right_v = state.rc_state.stick_right_v; //
+    rc_state_msg.stick_right_h = state.rc_state.stick_right_h; //
+    rc_state_msg.stick_left_v = state.rc_state.stick_left_v; //
+    rc_state_msg.stick_left_h = state.rc_state.stick_left_h; //
+    rc_state_msg.var_a = state.rc_state.var_a; //
+
+    rc_state_pub_ ->publish(rc_state_msg); //EA
+
     // publish odometry and tf
     PublishOdometryToROS(state.motion_state, dt);
 
@@ -139,6 +159,7 @@ class BunkerMessenger {
 
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
   rclcpp::Publisher<bunker_msgs::msg::BunkerStatus>::SharedPtr status_pub_;
+  rclcpp::Publisher<bunker_msgs::msg::BunkerRCState>::SharedPtr rc_state_pub_;  //EA
 
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr motion_cmd_sub_;
   // rclcpp::Subscription<bunker_msgs::msg::BunkerLightCmd>::SharedPtr
@@ -231,4 +252,4 @@ class BunkerMessenger {
 };
 }  // namespace westonrobot
 
-#endif /* SCOUT_MESSENGER_HPP */
+#endif /* BUNKER_MESSENGER_HPP */
